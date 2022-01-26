@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var debug = require('debug')('http')
 var fs = require('fs');
 const request = require('request')
 const uuid = require('uuid')
@@ -38,7 +39,7 @@ router.post('/', function(req, res, next) {
   //let buff = new Buffer( req.body.requests[0].image.content, "base64");
   let buff = Buffer.from( req.body.requests[0].image.content, "base64");
   var filename = uuid.v4();
-  fs.writeFileSync( __dirname + "/" + filename+".png", buff);
+  //fs.writeFileSync( __dirname + "/" + filename+".png", buff);
 
   const options = {
       url: MSREAD_endpoint +"/vision/v3.2/read/syncAnalyze",
@@ -46,22 +47,24 @@ router.post('/', function(req, res, next) {
       headers: {
         'Content-Type': 'application/octet-stream'
       },
-      body: fs.createReadStream( __dirname + '/'+ filename+'.png')
+      body: buff //fs.createReadStream( __dirname + '/'+ filename+'.png')
   }
-  //TO-BE-REMOVED
-  console.log( 'endpoint=' + MSREAD_endpoint );
-
+  //console.log( 'endpoint=' + MSREAD_endpoint );
+  
+  /*
   fs.unlink( __dirname + '/' + filename+'.png', (err) => {
       if( err)
           console.log('error on file deletion ');
   });
+  */
 
   request.post( options, function(err, resp) {
       if( err) {
           console.log(err);
-          return res.status(500).send("Unknow errors");
+          return res.status(500).send("Unknown errors");
       }
       msread = JSON.parse(resp.body);
+      debug("MS READ response: " + msread);
       if( resp.statusCode == 401 || resp.statusCode == 402) 
       {
           return res.status(401).send("Unauthorized");
@@ -113,24 +116,6 @@ router.post('/', function(req, res, next) {
           });
       });
       du_resp.responses[0].description = full_text;
-      /*
-      msread.result.block_boxes.forEach( p => {
-          du_resp.responses[0].textAnnotations.push ({
-              description: p[5],
-              score: p[4],
-              type: 'text',
-              boundingPoly: {
-                  vertices: [
-                      {x: p[0][0], y: p[0][1]},
-                      {x: p[1][0], y: p[1][1]},
-                      {x: p[2][0], y: p[2][1]},
-                      {x: p[3][0], y: p[3][1]}
-                  ]
-              }
-          });
-      })
-      */
-
       res.send( du_resp);
   });
 });
