@@ -56,8 +56,6 @@ router.post('/', function(req, res, next) {
         method: 'POST',
         formData: formdata,
     }
-    //TO-BE-REMOVED
-    //console.log( 'endpoint=' + synap_endpoint + ", type=" + synap_boxes_type);
 
     fs.unlink( __dirname + '/' + filename+'.png', (err) => {
         if( err)
@@ -75,8 +73,10 @@ router.post('/', function(req, res, next) {
             return res.status(401).send("Unauthorized");
         }
         if( resp.statusCode != 200) {
+            console.log( synap);
             return res.status(415).send("Unsupported Media Type or Not Acceptable ");
         }
+        var score_sum = 0.0;
         var du_resp = {
             responses: [
                 {
@@ -114,8 +114,9 @@ router.post('/', function(req, res, next) {
                     ]
                 }
             });
+            score_sum += p[4];
         })
-        
+        du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
         res.send( du_resp);
     });
 });

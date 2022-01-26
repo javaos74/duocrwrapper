@@ -38,8 +38,6 @@ router.post('/', function(req, res, next) {
   var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
   //let buff = new Buffer( req.body.requests[0].image.content, "base64");
   let buff = Buffer.from( req.body.requests[0].image.content, "base64");
-  var filename = uuid.v4();
-  //fs.writeFileSync( __dirname + "/" + filename+".png", buff);
 
   const options = {
       url: MSREAD_endpoint +"/vision/v3.2/read/syncAnalyze",
@@ -47,16 +45,8 @@ router.post('/', function(req, res, next) {
       headers: {
         'Content-Type': 'application/octet-stream'
       },
-      body: buff //fs.createReadStream( __dirname + '/'+ filename+'.png')
+      body: buff 
   }
-  //console.log( 'endpoint=' + MSREAD_endpoint );
-  
-  /*
-  fs.unlink( __dirname + '/' + filename+'.png', (err) => {
-      if( err)
-          console.log('error on file deletion ');
-  });
-  */
 
   request.post( options, function(err, resp) {
       if( err) {
@@ -70,6 +60,7 @@ router.post('/', function(req, res, next) {
           return res.status(401).send("Unauthorized");
       }
       if( resp.statusCode != 200) {
+        console.log( msread);
           return res.status(415).send("Unsupported Media Type or Not Acceptable ");
       }
       var du_resp = {
@@ -96,6 +87,7 @@ router.post('/', function(req, res, next) {
           ]
       }
       var full_text = ''
+      var score_sum = 0.0
       //full-text 
       msread.analyzeResult.readResults[0].lines.forEach( l => {
           full_text += l.text + "\r\n";
@@ -113,9 +105,11 @@ router.post('/', function(req, res, next) {
                     ]
                 }
               });
+              score_sum += w.confidence;
           });
       });
       du_resp.responses[0].description = full_text;
+      du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
       res.send( du_resp);
   });
 });
