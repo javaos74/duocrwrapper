@@ -18,14 +18,15 @@ const detect_angle = function( rotation) {
         return 270;
 }
 
+/* OCR Endpoint 기본 정보 */
 router.get('/info/model', function(req,res,next) {
   const info = {
-      accents:false,
-      commit:"309c4703a92d41ca08d470955f0e253b416b151b",
-      gpu:false,
-      model:"du-ocr",
-      rotation_detection:true,
-      version:"1.0.0"
+        accents:false,
+        commit:"309c4703a92d41ca08d470955f0e253b416b151b",
+        gpu:false,
+        model:"du-ocr",
+        rotation_detection:true,
+        version:"1.0.0"
       }
   res.send( info);
 });

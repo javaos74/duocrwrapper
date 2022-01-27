@@ -6,7 +6,7 @@ var logger = require('morgan');
 
 var msRouter = require('./routes/msread');
 var synapRouter = require('./routes/synap');
-
+var clovaRouter = require('./routes/clova');
 var app = express();
 
 // view engine setup
@@ -21,6 +21,7 @@ app.use(cookieParser());
 
 app.use('/ms', msRouter);
 app.use('/synap', synapRouter)
+app.use('/clova', clovaRouter);
 //app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
