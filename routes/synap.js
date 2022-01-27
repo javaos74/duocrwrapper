@@ -4,6 +4,7 @@ var fs = require('fs');
 const request = require('request')
 const uuid = require('uuid')
 const crypto = require('crypto');
+const nconf = require('nconf')
 
 const detect_angle = function( rotation) {
     let rot = 360 - rotation;
@@ -16,6 +17,8 @@ const detect_angle = function( rotation) {
     else 
         return 270;
 }
+
+nconf.file({file: './routes/config.json'});
 
 /* OCR Endpoint 기본 정보 */
 router.get('/info/model', function(req,res,next) {
@@ -33,7 +36,8 @@ router.get('/info/model', function(req,res,next) {
 
 /* POST body listing. */
 router.post('/', function(req, res, next) {
-    const synap_endpoint = process.env.SYNAP_ENDPOINT || "https://ailab.synap.co.kr/sdk/ocr";
+    //const synap_endpoint = process.env.SYNAP_ENDPOINT || "https://ailab.synap.co.kr/sdk/ocr";
+    const synap_endpoint = process.env.SYNAP_ENDPOINT || nconf.get("synap:endpoint");
     const synap_boxes_type = process.env.SYNAP_BOXES_TYPE || "block";
     res.writeContinue();
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  

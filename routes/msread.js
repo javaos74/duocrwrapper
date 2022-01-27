@@ -5,6 +5,7 @@ var fs = require('fs');
 const request = require('request')
 const uuid = require('uuid')
 const crypto = require('crypto');
+const nconf = require('nconf')
 
 const detect_angle = function( rotation) {
     let rot = rotation <0 ? 0 - rotation : 360 - rotation;
@@ -17,6 +18,8 @@ const detect_angle = function( rotation) {
     else 
         return 270;
 }
+
+nconf.file( {file: './routes/config.json'});
 
 /* OCR Endpoint 기본 정보 */
 router.get('/info/model', function(req,res,next) {
@@ -34,7 +37,8 @@ router.get('/info/model', function(req,res,next) {
 
 /* POST body listing. */
 router.post('/', function(req, res, next) {
-  const MSREAD_endpoint = process.env.MSREAD_ENDPOINT || "http://msread.koreacentral.cloudapp.azure.com:5000";
+  //const MSREAD_endpoint = process.env.MSREAD_ENDPOINT || "http://msread.koreacentral.cloudapp.azure.com:5000";
+  const MSREAD_endpoint = process.env.MSREAD_ENDPOINT || nconf.get("msread:endpoint");
   res.writeContinue();
   var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
   //let buff = new Buffer( req.body.requests[0].image.content, "base64");
@@ -109,7 +113,9 @@ router.post('/', function(req, res, next) {
               score_sum += w.confidence;
           });
       });
+      //전체 text 값을 제공하지 않아 words의 값을 전부 합함. 
       du_resp.responses[0].description = full_text;
+      //평균 score 값을 계산 
       du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
       res.send( du_resp);
   });

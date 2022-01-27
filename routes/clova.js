@@ -5,7 +5,9 @@ const request = require('request')
 const uuid = require('uuid')
 const crypto = require('crypto');
 const imsize = require('image-size')
+const nconf = require('nconf');
 
+nconf.file( './routes/config.json');
 
 /* OCR Endpoint 기본 정보 */
 router.get('/info/model', function(req,res,next) {
@@ -23,7 +25,8 @@ router.get('/info/model', function(req,res,next) {
 
 /* POST body listing. */
 router.post('/', function(req, res, next) {
-    const clova_endpoint = process.env.CLOVA_ENDPOINT || "https://412baztid8.apigw.ntruss.com/custom/v1/83/962db625f801e2f12fd4eb7ce08994255f56d8a27639ea5c30e23cac89b10a86/general";
+    //const clova_endpoint = process.env.CLOVA_ENDPOINT || "https://412baztid8.apigw.ntruss.com/custom/v1/83/962db625f801e2f12fd4eb7ce08994255f56d8a27639ea5c30e23cac89b10a86/general";
+    const clova_endpoint = process.env.CLOVA_ENDPOINT || nconf.get("clova:endpoint");
     res.writeContinue();
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
     //let buff = new Buffer( req.body.requests[0].image.content, "base64");
