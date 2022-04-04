@@ -9,6 +9,7 @@ const nconf = require('nconf');
 
 nconf.file( './routes/config.json');
 
+const rot_val = [0, 90, 180, 270];
 /* OCR Endpoint 기본 정보 */
 router.get('/info/model', function(req,res,next) {
     const info = {
@@ -61,11 +62,12 @@ router.post('/', function(req, res, next) {
             'Content-Type': 'multipart/form-data'
             }
     }
-
+/*
     fs.unlink( __dirname + '/' + filename+'.img', (err) => {
         if( err)
             console.error('error on file deletion ');
     });
+    */
 
     request.post( options, function(err, resp) {
         if( err) {
@@ -106,6 +108,8 @@ router.post('/', function(req, res, next) {
                 }
             ]
         }
+        var skew = [0,0,0,0];// { 0, 90, 180, 270 } 회전됨 문서
+        var rotation_check_count = 20;
         clova.images[0].fields.forEach( p => {
             du_resp.responses[0].textAnnotations.push ({
                 description: p.inferText,
@@ -114,10 +118,42 @@ router.post('/', function(req, res, next) {
                 boundingPoly: p.boundingPoly //구성이 동일해서 그대로 사용 
             });
             score_sum += p.inferConfidence;
+            while( rotation_check_count >= 0) {
+                if( p.boundingPoly.vertices[0].x == p.boundingPoly.vertices[1].x &&
+                    p.boundingPoly.vertices[1].y == p.boundingPoly.vertices[2].y && 
+                    p.boundingPoly.vertices[2].x > p.boundingPoly.vertices[3].x )
+                    skew[1]++;
+                else if ( p.boundingPoly.vertices[0].y == p.boundingPoly.vertices[1].y && 
+                    p.boundingPoly.vertices[1].x == p.boundingPoly.vertices[2].x &&
+                    p.boundingPoly.vertices[1].x < p.boundingPoly.vertices[0].x )
+                    skew[2]++;
+                else if ( p.boundingPoly.vertices[0].x == p.boundingPoly.vertices[1].x && 
+                    p.boundingPoly.vertices[1].y == p.boundingPoly.vertices[2].y && 
+                    p.boundingPoly.vertices[2].x > p.boundingPoly.vertices[1].x )
+                    skew[3]++;
+                else
+                    skew[0]++;
+                rotation_check_count--;
+            }
         })
+        var max_idx = 0, max=0, idx=0;
+        for( idx =0; idx <= skew.length; idx++)
+        {
+            if( skew[idx] > max) {
+                max = skew[idx];
+                max_id = idx;
+            }
+        }
+        du_resp.responses[0].angle =  rot_val[max_idx];
         //평균 score 값을 계산 
         du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
         res.send( du_resp);
+
+        fs.unlink( __dirname + '/' + filename+'.img', (err) => {
+            if( err)
+                console.error('error on file deletion ');
+        });
+
     });
 });
 
