@@ -118,7 +118,7 @@ router.post('/', function(req, res, next) {
                 boundingPoly: p.boundingPoly //구성이 동일해서 그대로 사용 
             });
             score_sum += p.inferConfidence;
-            while( rotation_check_count >= 0) {
+            if( rotation_check_count >= 0) {
                 if( p.boundingPoly.vertices[0].x == p.boundingPoly.vertices[1].x &&
                     p.boundingPoly.vertices[1].y == p.boundingPoly.vertices[2].y && 
                     p.boundingPoly.vertices[2].x > p.boundingPoly.vertices[3].x )
