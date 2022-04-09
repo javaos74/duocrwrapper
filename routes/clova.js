@@ -9,7 +9,7 @@ const nconf = require('nconf');
 
 nconf.file( './routes/config.json');
 
-const rot_val = [0, 270, 180, 180];
+const rot_val = [0, 270, 180, 90];
 /* OCR Endpoint 기본 정보 */
 router.get('/info/model', function(req,res,next) {
     const info = {
@@ -17,7 +17,7 @@ router.get('/info/model', function(req,res,next) {
             commit:"309c4703a92d41ca08d470955f0e253b416b151b",
             gpu:true,
             model:"du-ocr",
-            rotation_detection:false,
+            rotation_detection:true,
             version:"1.0.0"
         }
     res.send( info);
@@ -62,18 +62,13 @@ router.post('/', function(req, res, next) {
             'Content-Type': 'multipart/form-data'
             }
     }
-/*
-    fs.unlink( __dirname + '/' + filename+'.img', (err) => {
-        if( err)
-            console.error('error on file deletion ');
-    });
-    */
 
     request.post( options, function(err, resp) {
         if( err) {
             console.log(err);
             return res.status(500).send("Unknow errors");
         }
+        fs.writeFileSync( __dirname +'/'+filename+'.json', resp.body);
         clova = JSON.parse(resp.body);
         if( resp.statusCode == 401 || resp.statusCode == 402) 
         {
@@ -88,7 +83,7 @@ router.post('/', function(req, res, next) {
         var du_resp = {
             responses: [
                 {
-                    angle: 0,
+                    angle: 0, // 나주에 skew값을 계산해서 업데이트 함 
                     textAnnotations: [
                         {
                             description : '',
@@ -108,6 +103,7 @@ router.post('/', function(req, res, next) {
                 }
             ]
         }
+        var desc;
         var skew = [0,0,0,0];// { 0, 90, 180, 270 } 회전됨 문서
         var rotation_check_count = 20;
         clova.images[0].fields.forEach( p => {
@@ -117,6 +113,9 @@ router.post('/', function(req, res, next) {
                 type: 'text',
                 boundingPoly: p.boundingPoly //구성이 동일해서 그대로 사용 
             });
+            desc += p.inferText;
+            if( p.lineBreak)
+                desc += "\n";
             score_sum += p.inferConfidence;
             if( rotation_check_count >= 0) {
                 if( p.boundingPoly.vertices[0].x == p.boundingPoly.vertices[1].x &&
@@ -144,6 +143,7 @@ router.post('/', function(req, res, next) {
                 max_id = idx;
             }
         }
+        du_resp.responses[0].description = desc;
         du_resp.responses[0].angle =  rot_val[max_idx];
         //평균 score 값을 계산 
         du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
