@@ -9,7 +9,7 @@ const nconf = require('nconf');
 
 nconf.file( './routes/config.json');
 
-const rot_val = [0, 90, 180, 270];
+const rot_val = [0, 270, 180, 180];
 /* OCR Endpoint 기본 정보 */
 router.get('/info/model', function(req,res,next) {
     const info = {
