@@ -62,10 +62,7 @@ router.post('/', function(req, res, next) {
         formData: formdata,
     }
 
-    fs.unlink( __dirname + '/' + filename+'.jpg', (err) => {
-        if( err)
-            console.log('error on file deletion ');
-    });
+
 
     request.post( options, function(err, resp) {
         if( err) {
@@ -124,6 +121,11 @@ router.post('/', function(req, res, next) {
         //평균 score 값을 계산 
         du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
         res.send( du_resp);
+        
+        fs.unlink( __dirname + '/' + filename+'.jpg', (err) => {
+            if( err)
+                console.log('error on file deletion ');
+        });
     });
 });
 
