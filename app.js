@@ -23,7 +23,7 @@ app.use(cookieParser());
 app.use('/', indexRouter);
 app.use('/ms', msRouter);
 app.use('/synap', synapRouter);
-//app.use('/clova', clovaRouter);
+app.use('/clova', clovaRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
