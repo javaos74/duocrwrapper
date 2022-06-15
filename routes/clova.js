@@ -66,9 +66,13 @@ router.post('/', function(req, res, next) {
     request.post( options, function(err, resp) {
         if( err) {
             console.log(err);
+            fs.unlink( __dirname + '/' + filename+'.img', (err) => {
+                if( err)
+                    console.error('error on file deletion ');
+            });
             return res.status(500).send("Unknow errors");
         }
-        fs.writeFileSync( __dirname +'/'+filename+'.json', resp.body);
+        //fs.writeFileSync( __dirname +'/'+filename+'.json', resp.body);
         clova = JSON.parse(resp.body);
         if( resp.statusCode == 401 || resp.statusCode == 402) 
         {
