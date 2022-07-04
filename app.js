@@ -7,7 +7,7 @@ var logger = require('morgan');
 var msRouter = require('./routes/msread.js');
 var synapRouter = require('./routes/synap.js');
 var clovaRouter = require('./routes/clova.js');
-var indexRouter = require('./routes/index.js');
+//var indexRouter = require('./routes/index.js');
 var app = express();
 
 // view engine setup
@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.use(cookieParser());
 //app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
+//app.use('/', indexRouter);
 app.use('/ms', msRouter);
 app.use('/synap', synapRouter);
 app.use('/clova', clovaRouter);

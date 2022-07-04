@@ -23,6 +23,26 @@ router.get('/info/model', function(req,res,next) {
     res.send( info);
 });
 
+router.get('/config', function(req,res,next) {
+    const cfg = {
+        clova : nconf.get("clova:endpoint")
+    }
+    res.send( cfg);
+});
+
+router.put('/config', function(req,res,next) {
+    //console.log(req.body);
+    if( req.body.clova && req.body.clova.endpoint )
+    {
+        nconf.set("clova:endpoint", req.body.clova.endpoint);
+        nconf.save()
+        res.sendStatus(200);
+    }
+    else 
+    {
+        res.status(404).send("no clova.endpoint ");
+    }
+});
 
 /* POST body listing. */
 router.post('/', function(req, res, next) {

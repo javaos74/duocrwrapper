@@ -33,6 +33,27 @@ router.get('/info/model', function(req,res,next) {
     res.send( info);
 });
 
+router.get('/config', function(req,res,next) {
+    const cfg = {
+        synap : nconf.get("synap:endpoint")
+    }
+    res.send( cfg);
+});
+
+router.put('/config', function(req,res,next) {
+    console.log(req.body);
+    if( req.body.synap && req.body.synap.endpoint )
+    {
+        nconf.set("synap:endpoint", req.body.synap.endpoint);
+        nconf.save()
+        res.sendStatus(200);
+    }
+    else 
+    {
+        res.status(404).send("no synap.endpoint ");
+    }
+});
+
 
 /* POST body listing. */
 router.post('/', function(req, res, next) {
