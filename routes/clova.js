@@ -169,11 +169,14 @@ router.post('/', function(req, res, next) {
         du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
         res.send( du_resp);
 
-        fs.unlink( __dirname + '/' + filename+'.img', (err) => {
+        fs.unlink( __dirname + '/' + filename + '.img', (err) => {
             if( err)
                 console.error('error on file deletion ');
         });
-
+        fs.unlink( __dirname +'/' + filename + '.json', (err) => {
+            if( err)
+                console.error('error on json deletion ');
+        });
     });
 });
 
