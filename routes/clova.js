@@ -88,7 +88,7 @@ router.post('/', function(req, res, next) {
             console.log(err);
             return res.status(500).send("Unknow errors");
         }
-        fs.writeFileSync( __dirname +'/'+filename+'.json', resp.body);
+        //fs.writeFileSync( __dirname +'/'+filename+'.json', resp.body);
         clova = JSON.parse(resp.body);
         if( resp.statusCode == 401 || resp.statusCode == 402) 
         {
@@ -103,7 +103,7 @@ router.post('/', function(req, res, next) {
         var du_resp = {
             responses: [
                 {
-                    angle: 0, // 나주에 skew값을 계산해서 업데이트 함 
+                    angle: 0, // 나중에 skew값을 계산해서 업데이트 함 
                     textAnnotations: [
                         {
                             description : '',
@@ -172,10 +172,6 @@ router.post('/', function(req, res, next) {
         fs.unlink( __dirname + '/' + filename + '.img', (err) => {
             if( err)
                 console.error('error on file deletion ');
-        });
-        fs.unlink( __dirname +'/' + filename + '.json', (err) => {
-            if( err)
-                console.error('error on json deletion ');
         });
     });
 });
