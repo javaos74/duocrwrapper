@@ -84,10 +84,13 @@ router.post('/', function(req, res, next) {
     }
 
 
-
     request.post( options, function(err, resp) {
         if( err) {
             console.log(err);
+            fs.unlink( __dirname + '/' + filename + '.jpg', (err) => {
+                if( err)
+                    console.error('error on file deletion ');
+            });
             return res.status(500).send("Unknow errors");
         }
         synap = JSON.parse(resp.body);
