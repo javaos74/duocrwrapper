@@ -85,12 +85,12 @@ router.post('/', function(req, res, next) {
 
 
     request.post( options, function(err, resp) {
+        fs.unlink( __dirname + '/' + filename + '.jpg', (err) => {
+            if( err)
+                console.error('error on file deletion ');
+        });
         if( err) {
             console.log(err);
-            fs.unlink( __dirname + '/' + filename + '.jpg', (err) => {
-                if( err)
-                    console.error('error on file deletion ');
-            });
             return res.status(500).send("Unknow errors");
         }
         synap = JSON.parse(resp.body);
@@ -145,11 +145,7 @@ router.post('/', function(req, res, next) {
         //평균 score 값을 계산 
         du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
         res.send( du_resp);
-        
-        fs.unlink( __dirname + '/' + filename+'.jpg', (err) => {
-            if( err)
-                console.log('error on file deletion ');
-        });
+
     });
 });
 
