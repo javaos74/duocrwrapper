@@ -33,6 +33,27 @@ router.get('/info/model', function(req,res,next) {
     res.send( info);
 });
 
+router.get('/config', function(req,res,next) {
+    const cfg = {
+        synap : nconf.get("synap:endpoint")
+    }
+    res.send( cfg);
+});
+
+router.put('/config', function(req,res,next) {
+    console.log(req.body);
+    if( req.body.synap && req.body.synap.endpoint )
+    {
+        nconf.set("synap:endpoint", req.body.synap.endpoint);
+        nconf.save()
+        res.sendStatus(200);
+    }
+    else 
+    {
+        res.status(404).send("no synap.endpoint ");
+    }
+});
+
 
 /* POST body listing. */
 router.post('/', function(req, res, next) {
@@ -63,8 +84,11 @@ router.post('/', function(req, res, next) {
     }
 
 
-
     request.post( options, function(err, resp) {
+        fs.unlink( __dirname + '/' + filename + '.jpg', (err) => {
+            if( err)
+                console.error('error on file deletion ');
+        });
         if( err) {
             console.log(err);
             return res.status(500).send("Unknow errors");
@@ -121,11 +145,7 @@ router.post('/', function(req, res, next) {
         //평균 score 값을 계산 
         du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
         res.send( du_resp);
-        
-        fs.unlink( __dirname + '/' + filename+'.jpg', (err) => {
-            if( err)
-                console.log('error on file deletion ');
-        });
+
     });
 });
 

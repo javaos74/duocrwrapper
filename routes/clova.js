@@ -23,6 +23,26 @@ router.get('/info/model', function(req,res,next) {
     res.send( info);
 });
 
+router.get('/config', function(req,res,next) {
+    const cfg = {
+        clova : nconf.get("clova:endpoint")
+    }
+    res.send( cfg);
+});
+
+router.put('/config', function(req,res,next) {
+    //console.log(req.body);
+    if( req.body.clova && req.body.clova.endpoint )
+    {
+        nconf.set("clova:endpoint", req.body.clova.endpoint);
+        nconf.save()
+        res.sendStatus(200);
+    }
+    else 
+    {
+        res.status(404).send("no clova.endpoint ");
+    }
+});
 
 /* POST body listing. */
 router.post('/', function(req, res, next) {
@@ -64,12 +84,12 @@ router.post('/', function(req, res, next) {
     }
 
     request.post( options, function(err, resp) {
+        fs.unlink( __dirname + '/' + filename+'.img', (err) => {
+            if( err)
+                console.error('error on file deletion ');
+        });
         if( err) {
             console.log(err);
-            fs.unlink( __dirname + '/' + filename+'.img', (err) => {
-                if( err)
-                    console.error('error on file deletion ');
-            });
             return res.status(500).send("Unknow errors");
         }
         //fs.writeFileSync( __dirname +'/'+filename+'.json', resp.body);
@@ -87,7 +107,7 @@ router.post('/', function(req, res, next) {
         var du_resp = {
             responses: [
                 {
-                    angle: 0, // 나주에 skew값을 계산해서 업데이트 함 
+                    angle: 0, // 나중에 skew값을 계산해서 업데이트 함 
                     textAnnotations: [
                         {
                             description : '',
@@ -122,14 +142,14 @@ router.post('/', function(req, res, next) {
                 desc += "\n";
             score_sum += p.inferConfidence;
             if( rotation_check_count >= 0) {
-                if( p.boundingPoly.vertices[0].x == p.boundingPoly.vertices[1].x &&
-                    p.boundingPoly.vertices[1].y == p.boundingPoly.vertices[2].y && 
-                    p.boundingPoly.vertices[2].x > p.boundingPoly.vertices[3].x )
-                    skew[1]++;
+                if( p.boundingPoly.vertices[0].y == p.boundingPoly.vertices[1].y &&
+                    p.boundingPoly.vertices[1].x == p.boundingPoly.vertices[2].x && 
+                    p.boundingPoly.vertices[0].x > p.boundingPoly.vertices[1].x )
+                    skew[2]++;
                 else if ( p.boundingPoly.vertices[0].y == p.boundingPoly.vertices[1].y && 
                     p.boundingPoly.vertices[1].x == p.boundingPoly.vertices[2].x &&
                     p.boundingPoly.vertices[1].x < p.boundingPoly.vertices[0].x )
-                    skew[2]++;
+                    skew[1]++;
                 else if ( p.boundingPoly.vertices[0].x == p.boundingPoly.vertices[1].x && 
                     p.boundingPoly.vertices[1].y == p.boundingPoly.vertices[2].y && 
                     p.boundingPoly.vertices[2].x > p.boundingPoly.vertices[1].x )
@@ -152,12 +172,6 @@ router.post('/', function(req, res, next) {
         //평균 score 값을 계산 
         du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
         res.send( du_resp);
-
-        fs.unlink( __dirname + '/' + filename+'.img', (err) => {
-            if( err)
-                console.error('error on file deletion ');
-        });
-
     });
 });
 
