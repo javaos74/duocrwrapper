@@ -119,7 +119,7 @@ router.post('/', function(req, res, next) {
                                     {x: 0, y: 0},
                                     {x: feature.width, y: 0},
                                     {x: feature.width, y: feature.height},
-                                    {x: 0, x: feature.height},
+                                    {x: 0, y: feature.height}
                                 ]
                             }
                         }
@@ -171,13 +171,8 @@ router.post('/', function(req, res, next) {
         du_resp.responses[0].angle =  rot_val[max_idx];
         //평균 score 값을 계산 
         du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
+        //console.log( JSON.stringify(du_resp));
         res.send( du_resp);
-
-        fs.unlink( __dirname + '/' + filename+'.img', (err) => {
-            if( err)
-                console.error('error on file deletion ');
-        });
-
     });
 });
 

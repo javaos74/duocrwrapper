@@ -49,22 +49,25 @@ router.post('/', function(req, res, next) {
     const qanda_endpoint = process.env.QANDA_ENDPOINT || nconf.get("qanda:endpoint");
     res.writeContinue();
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
-    //let buff = Buffer.from( req.body.requests[0].image.content, "base64");
+    let buff = Buffer.from( req.body.requests[0].image.content, "base64");
+    var filename = uuid.v4();
+    fs.writeFileSync( __dirname + '/' + filename+'.img', buff);
     //multipart/form-data
     const formdata = {
-        image: req.body.requests[0].image.content
+        image: fs.createReadStream( __dirname + '/' + filename+".img")
     }
 
     const options = {
         url: qanda_endpoint,
         method: 'POST',
-        formData: formdata,
-        headers: {
-            'Content-Type': 'multipart/form-data'
-            }
+        formData: formdata
     }
 
     request.post( options, function(err, resp) {
+        fs.unlink( __dirname + '/' + filename+'.img', (err) => {
+            if( err)
+                console.error('error on file deletion ');
+        });
         if( err) {
             console.log(err);
             return res.status(500).send("Unknow errors");
@@ -86,7 +89,7 @@ router.post('/', function(req, res, next) {
                     angle: qanda.angle, // 나중에 skew값을 계산해서 업데이트 함 
                     textAnnotations: [
                         {
-                            description : qanda.text,
+                            description :'',
                             score: 0,
                             type: 'text',
                             image_hash: hash,
@@ -95,7 +98,7 @@ router.post('/', function(req, res, next) {
                                     {x: 0, y: 0},
                                     {x: qanda.width, y: 0},
                                     {x: qanda.width, y: qanda.height},
-                                    {x: 0, x: qanda.height},
+                                    {x: 0, y: qanda.height},
                                 ]
                             }
                         }
@@ -108,8 +111,8 @@ router.post('/', function(req, res, next) {
         qanda.word_boxes.forEach( p => {
             du_resp.responses[0].textAnnotations.push ({
                 description: p.text,
-                score: parseFloat(p.confidence),
-                type: p.type,
+                score: parseFloat(p.confidence).toFixed(3),
+                type: 'text',
                 boundingPoly: { 
                     vertices: [
                         {x: p.points[0][0], y: p.points[0][1]},
@@ -119,12 +122,11 @@ router.post('/', function(req, res, next) {
                     ]
                 }
             });
-            score_sum += parseFloat(p.confidence);
+            score_sum += parseFloat(p.confidence).toFixed(3);
         })
         du_resp.responses[0].description = qanda.text;
         //평균 score 값을 계산 
         du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
-        du_resp.responses[0].textAnnotations[0].score = du_resp.responses[0].score 
         //console.log( JSON.stringify(du_resp));
         res.send( du_resp);
 
