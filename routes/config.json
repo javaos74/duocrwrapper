@@ -7,5 +7,8 @@
     },
     "clova": {
         "endpoint" : "https://412baztid8.apigw.ntruss.com/custom/v1/83/962db625f801e2f12fd4eb7ce08994255f56d8a27639ea5c30e23cac89b10a86/general"
+    },
+    "qanda": {
+        "endpoint" : "http://localhost:3000/ocr"
     }
 }
