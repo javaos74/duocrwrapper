@@ -46,12 +46,10 @@ router.put('/config', function(req,res,next) {
 
 /* POST body listing. */
 router.post('/', function(req, res, next) {
-    //const clova_endpoint = process.env.CLOVA_ENDPOINT || "https://412baztid8.apigw.ntruss.com/custom/v1/83/962db625f801e2f12fd4eb7ce08994255f56d8a27639ea5c30e23cac89b10a86/general";
-    const clova_endpoint = process.env.CLOVA_ENDPOINT || nconf.get("qanda:endpoint");
+    const qanda_endpoint = process.env.QANDA_ENDPOINT || nconf.get("qanda:endpoint");
     res.writeContinue();
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
-    //let buff = new Buffer( req.body.requests[0].image.content, "base64");
-    let buff = Buffer.from( req.body.requests[0].image.content, "base64");
+    //let buff = Buffer.from( req.body.requests[0].image.content, "base64");
     //multipart/form-data
     const formdata = {
         image: req.body.requests[0].image.content
@@ -71,6 +69,7 @@ router.post('/', function(req, res, next) {
             console.log(err);
             return res.status(500).send("Unknow errors");
         }
+        //console.log( resp.body)
         qanda = JSON.parse(resp.body);
         if( resp.statusCode == 401 || resp.statusCode == 402) 
         {
@@ -84,10 +83,10 @@ router.post('/', function(req, res, next) {
         var du_resp = {
             responses: [
                 {
-                    angle: 0, // 나중에 skew값을 계산해서 업데이트 함 
+                    angle: qanda.angle, // 나중에 skew값을 계산해서 업데이트 함 
                     textAnnotations: [
                         {
-                            description : '',
+                            description : qanda.text,
                             score: 0,
                             type: 'text',
                             image_hash: hash,
@@ -109,17 +108,24 @@ router.post('/', function(req, res, next) {
         qanda.word_boxes.forEach( p => {
             du_resp.responses[0].textAnnotations.push ({
                 description: p.text,
-                score: p.confidence,
+                score: parseFloat(p.confidence),
                 type: p.type,
                 boundingPoly: { 
-                    vertices: p.points //구성이 동일해서 그대로 사용 
+                    vertices: [
+                        {x: p.points[0][0], y: p.points[0][1]},
+                        {x: p.points[1][0], y: p.points[1][1]},
+                        {x: p.points[2][0], y: p.points[2][1]},
+                        {x: p.points[3][0], y: p.points[3][1]}
+                    ]
                 }
             });
-            score_sum += p.confidence;
+            score_sum += parseFloat(p.confidence);
         })
         du_resp.responses[0].description = qanda.text;
         //평균 score 값을 계산 
         du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
+        du_resp.responses[0].textAnnotations[0].score = du_resp.responses[0].score 
+        //console.log( JSON.stringify(du_resp));
         res.send( du_resp);
 
     });
