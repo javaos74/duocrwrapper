@@ -110,8 +110,8 @@ router.post('/', function(req, res, next) {
         var skew = [0,0,0,0];// { 0, 90, 180, 270 } 회전됨 문서
         qanda.word_boxes.forEach( p => {
             du_resp.responses[0].textAnnotations.push ({
-                description: p.text,
-                score: parseFloat(p.confidence).toFixed(3),
+                description: p.text, //p.text.replace(/[^\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318FA-Za-z0-9,\.\-]/gi,""),
+                score: parseFloat(parseFloat(p.confidence).toFixed(3)),
                 type: 'text',
                 boundingPoly: { 
                     vertices: [
@@ -122,12 +122,13 @@ router.post('/', function(req, res, next) {
                     ]
                 }
             });
-            score_sum += parseFloat(p.confidence).toFixed(3);
+            score_sum += parseFloat(parseFloat(p.confidence).toFixed(3));
         })
         du_resp.responses[0].description = qanda.text;
         //평균 score 값을 계산 
         du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
         //console.log( JSON.stringify(du_resp));
+        //fs.writeFileSync(__dirname + '/' + filename+".json", JSON.stringify(du_resp));
         res.send( du_resp);
 
     });
