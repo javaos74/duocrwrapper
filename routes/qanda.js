@@ -6,7 +6,7 @@ const uuid = require('uuid')
 const crypto = require('crypto');
 const imsize = require('image-size')
 const nconf = require('nconf');
-
+var hints = require('./routes/qanda_hints.json'); 
 nconf.file( './routes/config.json');
 
 const rot_val = [0, 270, 180, 90];
@@ -44,6 +44,17 @@ router.put('/config', function(req,res,next) {
     }
 });
 
+router.put('/hints', function(req,res,next) {
+    if( req.body.hints )
+    {
+        hints = req.body.hints;
+        res.sendStatus(200);
+    }
+    else {
+    res.status(404).send("no valid hints data");
+    }
+});
+
 /* POST body listing. */
 router.post('/', function(req, res, next) {
     const qanda_endpoint = process.env.QANDA_ENDPOINT || nconf.get("qanda:endpoint");
@@ -51,10 +62,12 @@ router.post('/', function(req, res, next) {
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
     let buff = Buffer.from( req.body.requests[0].image.content, "base64");
     var filename = uuid.v4();
-    fs.writeFileSync( __dirname + '/' + filename+'.img', buff);
+    fs.writeFileSync( __dirname + '/' + filename + '.img', buff);
     //multipart/form-data
     const formdata = {
-        image: fs.createReadStream( __dirname + '/' + filename+".img")
+        image: fs.createReadStream( __dirname + '/' + filename + '.img'),
+        context: req.headers['traceparent'],
+        hints: hints
     }
 
     const options = {
@@ -64,7 +77,7 @@ router.post('/', function(req, res, next) {
     }
 
     request.post( options, function(err, resp) {
-        fs.unlink( __dirname + '/' + filename+'.img', (err) => {
+        fs.unlink( __dirname + '/' + filename + '.img', (err) => {
             if( err)
                 console.error('error on file deletion ');
         });
