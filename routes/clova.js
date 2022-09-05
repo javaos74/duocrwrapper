@@ -51,6 +51,7 @@ router.post('/', function(req, res, next) {
     res.writeContinue();
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
     //let buff = new Buffer( req.body.requests[0].image.content, "base64");
+    //console.log( req.headers);
     let buff = Buffer.from( req.body.requests[0].image.content, "base64");
     var filename = uuid.v4();
     fs.writeFileSync( __dirname + '/' + filename+'.img', buff);
@@ -172,12 +173,6 @@ router.post('/', function(req, res, next) {
         //평균 score 값을 계산 
         du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
         res.send( du_resp);
-
-        fs.unlink( __dirname + '/' + filename+'.img', (err) => {
-            if( err)
-                console.error('error on file deletion ');
-        });
-
     });
 });
 
