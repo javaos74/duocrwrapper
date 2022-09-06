@@ -29,7 +29,7 @@ router.get('/config', function(req,res,next) {
     }
     res.send( cfg);
 });
-
+t
 router.put('/config', function(req,res,next) {
     //console.log(req.body);
     if( req.body.clova && req.body.clova.endpoint )
@@ -45,9 +45,10 @@ router.put('/config', function(req,res,next) {
 });
 
 router.put('/hints', function(req,res,next) {
+    console.log(req.body);
     if( req.body.hints )
     {
-        hints = req.body.hints;
+        hints = req.body;
         res.sendStatus(200);
     }
     else {
@@ -67,7 +68,7 @@ router.post('/', function(req, res, next) {
     const formdata = {
         image: fs.createReadStream( __dirname + '/' + filename + '.img'),
         context: req.headers['traceparent'],
-        hints: hints
+        hints: hints['hints']
     }
 
     const options = {
@@ -75,7 +76,7 @@ router.post('/', function(req, res, next) {
         method: 'POST',
         formData: formdata
     }
-
+    console.log( formData.hints);
     request.post( options, function(err, resp) {
         fs.unlink( __dirname + '/' + filename + '.img', (err) => {
             if( err)
