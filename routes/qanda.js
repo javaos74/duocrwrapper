@@ -6,9 +6,9 @@ const uuid = require('uuid')
 const crypto = require('crypto');
 const imsize = require('image-size')
 const nconf = require('nconf');
-var hints = require('./routes/qanda_hints.json'); 
 nconf.file( './routes/config.json');
 
+var hints = JSON.parse(fs.readFileSync("./routes/qanda_hints.json"))
 const rot_val = [0, 270, 180, 90];
 /* OCR Endpoint 기본 정보 */
 router.get('/info/model', function(req,res,next) {
@@ -29,7 +29,7 @@ router.get('/config', function(req,res,next) {
     }
     res.send( cfg);
 });
-t
+
 router.put('/config', function(req,res,next) {
     //console.log(req.body);
     if( req.body.clova && req.body.clova.endpoint )
@@ -45,15 +45,19 @@ router.put('/config', function(req,res,next) {
 });
 
 router.put('/hints', function(req,res,next) {
-    console.log(req.body);
+    //console.log(req.body);
     if( req.body.hints )
     {
         hints = req.body;
         res.sendStatus(200);
     }
     else {
-    res.status(404).send("no valid hints data");
+        res.status(404).send("no valid hints data");
     }
+});
+
+router.get('/hints', function(req, res, next) {
+    res.send( hints);
 });
 
 /* POST body listing. */
@@ -76,7 +80,7 @@ router.post('/', function(req, res, next) {
         method: 'POST',
         formData: formdata
     }
-    console.log( formData.hints);
+    //console.log( formdata.hints)
     request.post( options, function(err, resp) {
         fs.unlink( __dirname + '/' + filename + '.img', (err) => {
             if( err)
@@ -103,7 +107,7 @@ router.post('/', function(req, res, next) {
                     angle: qanda.angle, // 나중에 skew값을 계산해서 업데이트 함 
                     textAnnotations: [
                         {
-                            description :'',
+                            description : qanda.text,
                             score: 0,
                             type: 'text',
                             image_hash: hash,
@@ -138,7 +142,7 @@ router.post('/', function(req, res, next) {
             });
             score_sum += parseFloat(parseFloat(p.confidence).toFixed(3));
         })
-        du_resp.responses[0].description = qanda.text;
+        //du_resp.responses[0].description = qanda.text;
         //평균 score 값을 계산 
         du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
         //console.log( JSON.stringify(du_resp));
