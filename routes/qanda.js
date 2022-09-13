@@ -72,7 +72,7 @@ router.post('/', function(req, res, next) {
     const formdata = {
         image: fs.createReadStream( __dirname + '/' + filename + '.img'),
         context: req.headers['traceparent'],
-        hints: hints['hints']
+        hints: JSON.stringify(hints.hints)
     }
 
     const options = {
