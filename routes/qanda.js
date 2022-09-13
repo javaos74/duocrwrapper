@@ -97,7 +97,7 @@ router.post('/', function(req, res, next) {
             return res.status(401).send("Unauthorized");
         }
         if( resp.statusCode != 200) {
-            console.log( clova);
+            console.log( qanda);
             return res.status(415).send("Unsupported Media Type or Not Acceptable ");
         }
         var score_sum = 0.0;
