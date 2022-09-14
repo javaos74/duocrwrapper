@@ -69,10 +69,17 @@ router.post('/', function(req, res, next) {
     var filename = uuid.v4();
     fs.writeFileSync( __dirname + '/' + filename + '.img', buff);
     //multipart/form-data
-    const formdata = {
-        image: fs.createReadStream( __dirname + '/' + filename + '.img'),
-        context: req.headers['traceparent'],
-        hints: JSON.stringify(hints.hints)
+    var formdata = {
+        image: fs.createReadStream( __dirname + '/' + filename + '.img')
+    }
+    if( hints.hints && hints.hints.length > 0)
+    {
+        formdata['hints'] = JSON.stringify(hints.hints)
+    }
+    //Document Manager에서 호출 시 
+    if( req.headers['traceparent']) 
+    {
+        formdata['context'] = req.headers['traceparent'];
     }
 
     const options = {
@@ -80,7 +87,10 @@ router.post('/', function(req, res, next) {
         method: 'POST',
         formData: formdata
     }
-    //console.log( formdata.hints)
+    // Digitize Document 에서 호출 
+    //console.log( req.body.requests[0].imageContext); { languageHints: [ 'auto' ] }
+    //console.log( req.body.requests[0].features); [ { type: 'TextDetection' } ]
+    //console.log( formdata.context, formdata.hints)
     request.post( options, function(err, resp) {
         fs.unlink( __dirname + '/' + filename + '.img', (err) => {
             if( err)
