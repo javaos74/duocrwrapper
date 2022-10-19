@@ -35,7 +35,9 @@ router.get('/info/model', function(req,res,next) {
 
 router.get('/config', function(req,res,next) {
     const cfg = {
-        synap : nconf.get("synap:endpoint")
+        synap :  {
+            endpoint: nconf.get("synap:endpoint")
+        }
     }
     res.send( cfg);
 });
