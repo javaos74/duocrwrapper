@@ -1,6 +1,6 @@
 {
     "synap": {
-        "endpoint": "http://20.249.84.170:5000/sdk/ocr"
+        "endpoint": "https://ailab.synap.co.kr/sdk/ocr"
     },
     "msread": {
         "endpoint": "http://msread.koreacentral.cloudapp.azure.com:5000"
