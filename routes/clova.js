@@ -25,7 +25,9 @@ router.get('/info/model', function(req,res,next) {
 
 router.get('/config', function(req,res,next) {
     const cfg = {
-        clova : nconf.get("clova:endpoint")
+        clova : {
+            endpoint: nconf.get("clova:endpoint")
+        }
     }
     res.send( cfg);
 });

@@ -25,7 +25,9 @@ router.get('/info/model', function(req,res,next) {
 
 router.get('/config', function(req,res,next) {
     const cfg = {
-        qanda : nconf.get("qanda:endpoint")
+        qanda : {
+            endpoint: nconf.get("qanda:endpoint")
+        }
     }
     res.send( cfg);
 });
