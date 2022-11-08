@@ -1,0 +1,18 @@
+[Unit]
+Description=DU OCR Wrapper Service
+After=network.target
+
+[Service]
+#change working directory
+WorkingDirectory=/home/charles/duocrwrapper
+Type=simple
+#change user
+User=charles
+ExecStart=/bin/node ./bin/www
+Restart=on-failure
+RestartSec=10
+#change port if required
+Environment=PORT=5000
+
+[Install]
+WantedBy=multi-user.target
