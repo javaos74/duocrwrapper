@@ -128,7 +128,23 @@ router.post('/', function(req, res, next) {
                 }
             ]
         }
-        synap.result.block_boxes.forEach( p => {
+
+        let boxes;
+        switch (synap_boxes_type) {
+        case "raw":
+            boxes = synap.result.boxes;
+            break;
+        case "block":
+            boxes = synap.result.block_boxes;
+            break;
+        case "line":
+            boxes = synap.result.line_boxes;
+            break;
+        default:
+            return res.status(500).send("Unknown or unsupported boxes type: " + synap_boxes_type);
+        }
+
+        boxes.forEach( p => {
             du_resp.responses[0].textAnnotations.push ({
                 description: p[5],
                 score: p[4],
