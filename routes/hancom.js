@@ -95,8 +95,8 @@ router.post('/', function(req, res, next) {
             console.log( hancom);
             return res.status(415).send( hancom.msg);
         }
-
-        var score_sum = 0.0;
+        //console.log(hancom);
+        var min_score = 1.0;
         var du_resp = {
             responses: [
                 {
@@ -128,17 +128,18 @@ router.post('/', function(req, res, next) {
                 type: 'text',
                 boundingPoly: {
                     vertices: [
-                        {x: p.hbox[2], y: p.hbox[3]},
-                        {x: p.hbox[4], y: p.hbox[5]},
-                        {x: p.hbox[6], y: p.hbox[7]},
-                        {x: p.hbox[0], y: p.hbox[1]}
+                        {x: p.bbox[0], y: p.bbox[1]},
+                        {x: p.bbox[2], y: p.bbox[3]},
+                        {x: p.bbox[4], y: p.bbox[5]},
+                        {x: p.bbox[6], y: p.bbox[7]}
                     ]
                 }
             });
-            score_sum += p.score;
+            min_score = Math.min( min_score, parseFloat(p.score));
         })
         //평균 score 값을 계산 
-        du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length-1;
+        du_resp.responses[0].score = min_score;
+        //console.log(du_resp);
         res.send( du_resp);
 
     });
