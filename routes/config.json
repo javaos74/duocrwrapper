@@ -12,6 +12,6 @@
         "endpoint" : "http://gpu.myrobots.co.kr:5000/predict"
     },
     "hancom": {
-        "endpoint" : "http://http://ocr-server.apps.orca.cloud.hancom.com/argoocr"
+        "endpoint" : "http://ocr-server.apps.orca.cloud.hancom.com/argoocr"
     }
 }

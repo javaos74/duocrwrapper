@@ -105,7 +105,7 @@ router.post('/', function(req, res, next) {
             console.log( clova);
             return res.status(415).send("Unsupported Media Type or Not Acceptable ");
         }
-        var score_sum = 0.0;
+        var min_score = 1.0;
         var full_text = ''
         var du_resp = {
             responses: [
@@ -143,7 +143,7 @@ router.post('/', function(req, res, next) {
             desc += p.inferText;
             if( p.lineBreak)
                 desc += "\n";
-            score_sum += p.inferConfidence;
+            min_score =  Math.min( min_score, p.inferConfidence);
             if( rotation_check_count >= 0) {
                 if( p.boundingPoly.vertices[0].y == p.boundingPoly.vertices[1].y &&
                     p.boundingPoly.vertices[1].x == p.boundingPoly.vertices[2].x && 
@@ -173,7 +173,7 @@ router.post('/', function(req, res, next) {
         du_resp.responses[0].description = desc;
         du_resp.responses[0].angle =  rot_val[max_idx];
         //평균 score 값을 계산 
-        du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
+        du_resp.responses[0].score = min_score;
         //console.log( JSON.stringify(du_resp));
         res.send( du_resp);
     });

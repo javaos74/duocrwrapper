@@ -104,7 +104,7 @@ router.post('/', function(req, res, next) {
             console.log( synap);
             return res.status(415).send("Unsupported Media Type or Not Acceptable ");
         }
-        var score_sum = 0.0;
+        var min_score = 1.0;
         var du_resp = {
             responses: [
                 {
@@ -158,10 +158,10 @@ router.post('/', function(req, res, next) {
                     ]
                 }
             });
-            score_sum += p[4];
+            min_score =  Math.min( min_score, p[4]);
         })
-        //평균 score 값을 계산 
-        du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
+        //가장 낮은 score 값을 계산 
+        du_resp.responses[0].score = min_score;
         res.send( du_resp);
 
     });
