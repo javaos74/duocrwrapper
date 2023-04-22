@@ -167,12 +167,12 @@ router.post('/', function(req, res, next) {
         {
             if( skew[idx] > max) {
                 max = skew[idx];
-                max_id = idx;
+                max_idx = idx;
             }
         }
         du_resp.responses[0].description = desc;
         du_resp.responses[0].angle =  rot_val[max_idx];
-        //평균 score 값을 계산 
+        //가장 낮은 score 값을 사용 
         du_resp.responses[0].score = min_score;
         //console.log( JSON.stringify(du_resp));
         res.send( du_resp);
