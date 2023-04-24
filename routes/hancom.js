@@ -100,7 +100,7 @@ router.post('/', function(req, res, next) {
         var du_resp = {
             responses: [
                 {
-                    angle: hancom.content.ocr_data[0].image_rotation,
+                    angle: detect_angle(hancom.content.ocr_data[0].image_rotation), 
                     textAnnotations: [
                         {
                             description : hancom.content.ocr_data[0].page_text,

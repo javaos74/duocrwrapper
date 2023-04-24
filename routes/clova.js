@@ -145,14 +145,14 @@ router.post('/', function(req, res, next) {
                 desc += "\n";
             min_score =  Math.min( min_score, p.inferConfidence);
             if( rotation_check_count >= 0) {
-                if( p.boundingPoly.vertices[0].y == p.boundingPoly.vertices[1].y &&
-                    p.boundingPoly.vertices[1].x == p.boundingPoly.vertices[2].x && 
-                    p.boundingPoly.vertices[0].x > p.boundingPoly.vertices[1].x )
-                    skew[2]++;
+                if( p.boundingPoly.vertices[0].x == p.boundingPoly.vertices[1].x &&
+                    p.boundingPoly.vertices[1].y == p.boundingPoly.vertices[2].y && 
+                    p.boundingPoly.vertices[2].x > p.boundingPoly.vertices[3].x )
+                    skew[1]++;
                 else if ( p.boundingPoly.vertices[0].y == p.boundingPoly.vertices[1].y && 
                     p.boundingPoly.vertices[1].x == p.boundingPoly.vertices[2].x &&
                     p.boundingPoly.vertices[1].x < p.boundingPoly.vertices[0].x )
-                    skew[1]++;
+                    skew[2]++;
                 else if ( p.boundingPoly.vertices[0].x == p.boundingPoly.vertices[1].x && 
                     p.boundingPoly.vertices[1].y == p.boundingPoly.vertices[2].y && 
                     p.boundingPoly.vertices[2].x > p.boundingPoly.vertices[1].x )
@@ -163,7 +163,7 @@ router.post('/', function(req, res, next) {
             }
         })
         var max_idx = 0, max=0, idx=0;
-        for( idx =0; idx <= skew.length; idx++)
+        for( idx =0; idx < skew.length; idx++)
         {
             if( skew[idx] > max) {
                 max = skew[idx];
