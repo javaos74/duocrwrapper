@@ -10,5 +10,9 @@ router.get('/', function(req,res,next) {
     res.send( info);
 });
 
+router.get('/robot', function(req,res,next) {
+	console.log(req);
+	res.send("OK");
+}
 
 module.exports = router;

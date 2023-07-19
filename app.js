@@ -7,6 +7,8 @@ var logger = require('morgan');
 var msRouter = require('./routes/msread.js');
 var synapRouter = require('./routes/synap.js');
 var clovaRouter = require('./routes/clova.js');
+var qandaRouter = require('./routes/qanda.js');
+var hancomRouter = require('./routes/hancom.js');
 //var indexRouter = require('./routes/index.js');
 var app = express();
 
@@ -24,6 +26,8 @@ app.use(cookieParser());
 app.use('/ms', msRouter);
 app.use('/synap', synapRouter);
 app.use('/clova', clovaRouter);
+app.use('/qanda', qandaRouter);
+app.use('/hancom', hancomRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

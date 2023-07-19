@@ -36,7 +36,7 @@ router.get('/info/model', function(req,res,next) {
 router.get('/config', function(req,res,next) {
     const cfg = {
         synap :  {
-            endpoint: nconf.get("synap:endpoint")
+            endpoint: nconf.get("hancom:endpoint")
         }
     }
     res.send( cfg);
@@ -46,81 +46,73 @@ router.put('/config', function(req,res,next) {
     console.log(req.body);
     if( req.body.synap && req.body.synap.endpoint )
     {
-        nconf.set("synap:endpoint", req.body.synap.endpoint);
+        nconf.set("hancom:endpoint", req.body.synap.endpoint);
         nconf.save()
         res.sendStatus(200);
     }
     else 
     {
-        res.status(404).send("no synap.endpoint ");
+        res.status(404).send("no hancom.endpoint ");
     }
 });
 
 
 /* POST body listing. */
 router.post('/', function(req, res, next) {
-    //const synap_endpoint = process.env.SYNAP_ENDPOINT || "https://ailab.synap.co.kr/sdk/ocr";
-    const synap_endpoint = process.env.SYNAP_ENDPOINT || nconf.get("synap:endpoint");
-    const synap_boxes_type = process.env.SYNAP_BOXES_TYPE || "block";
+    const hancom_endpoint = process.env.HANCOM_ENDPOINT || nconf.get("hancom:endpoint");
     res.writeContinue();
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
-    //let buff = new Buffer( req.body.requests[0].image.content, "base64");
-    let buff = Buffer.from( req.body.requests[0].image.content, "base64");
+    //let buff = Buffer.from( req.body.requests[0].image.content, "base64");
     var filename = uuid.v4();
-    fs.writeFileSync( __dirname + "/" + filename+".jpg", buff);
+    //fs.writeFileSync( __dirname + "/" + filename+".jpg", buff);
 
     const formdata = {
-        api_key: req.headers['x-uipath-license'],
-        type: 'upload',
-        boxes_type: synap_boxes_type,
-        image: fs.createReadStream( __dirname + '/'+ filename+'.jpg'),
-        coord: 'origin',
-        skew: 'image',
-        langs: 'all',
-        textout: 'true'
+        key: req.headers['x-uipath-license'],
+        request_id: filename,
+        file_format: 'image',
+        file_url: '',
+        file_bytes: req.body.requests[0].image.content,
+        file_upload: ''
     }
     const options = {
-        url: synap_endpoint,
+        url: hancom_endpoint,
         method: 'POST',
         formData: formdata,
     }
 
 
     request.post( options, function(err, resp) {
-        fs.unlink( __dirname + '/' + filename + '.jpg', (err) => {
-            if( err)
-                console.error('error on file deletion ');
-        });
         if( err) {
             console.log(err);
             return res.status(500).send("Unknow errors");
         }
-        synap = JSON.parse(resp.body);
-        if( resp.statusCode == 401 || resp.statusCode == 402) 
+        hancom = JSON.parse(resp.body);
+        if( resp.statusCode == 422)
         {
-            return res.status(401).send("Unauthorized");
+            return res.status(422).send("Validation Error");
         }
         if( resp.statusCode != 200) {
-            console.log( synap);
-            return res.status(415).send("Unsupported Media Type or Not Acceptable ");
+            console.log( hancom);
+            return res.status(415).send( hancom.msg);
         }
+        //console.log(hancom);
         var min_score = 1.0;
         var du_resp = {
             responses: [
                 {
-                    angle: detect_angle( synap.result.rotation),
+                    angle: detect_angle(hancom.content.ocr_data[0].image_rotation), 
                     textAnnotations: [
                         {
-                            description : synap.result.full_text,
+                            description : hancom.content.ocr_data[0].page_text,
                             score: 0,
                             type: 'text',
                             image_hash: hash,
                             boundingPoly : {
                                 vertices: [
                                     {x: 0, y: 0},
-                                    {x: synap.result.width, y: 0},
-                                    {x: synap.result.width, y: synap.result.height},
-                                    {x: 0, x: synap.result.height},
+                                    {x: hancom.content.ocr_data[0].image_width, y: 0},
+                                    {x: hancom.content.ocr_data[0].image_width, y: hancom.content.ocr_data[0].image_height},
+                                    {x: 0, x: hancom.content.ocr_data[0].image_height},
                                 ]
                             }
                         }
@@ -129,39 +121,25 @@ router.post('/', function(req, res, next) {
             ]
         }
 
-        let boxes;
-        switch (synap_boxes_type) {
-        case "raw":
-            boxes = synap.result.boxes;
-            break;
-        case "block":
-            boxes = synap.result.block_boxes;
-            break;
-        case "line":
-            boxes = synap.result.line_boxes;
-            break;
-        default:
-            return res.status(500).send("Unknown or unsupported boxes type: " + synap_boxes_type);
-        }
-
-        boxes.forEach( p => {
+        hancom.content.ocr_data[0].words.forEach( p => {
             du_resp.responses[0].textAnnotations.push ({
-                description: p[5],
-                score: p[4],
+                description: p.text,
+                score: p.score,
                 type: 'text',
                 boundingPoly: {
                     vertices: [
-                        {x: p[0][0], y: p[0][1]},
-                        {x: p[1][0], y: p[1][1]},
-                        {x: p[2][0], y: p[2][1]},
-                        {x: p[3][0], y: p[3][1]}
+                        {x: p.bbox[0], y: p.bbox[1]},
+                        {x: p.bbox[2], y: p.bbox[3]},
+                        {x: p.bbox[4], y: p.bbox[5]},
+                        {x: p.bbox[6], y: p.bbox[7]}
                     ]
                 }
             });
-            min_score =  Math.min( min_score, p[4]);
+            min_score = Math.min( min_score, parseFloat(p.score));
         })
-        //가장 낮은 score 값을 계산 
+        //평균 score 값을 계산 
         du_resp.responses[0].score = min_score;
+        //console.log(du_resp);
         res.send( du_resp);
 
     });
