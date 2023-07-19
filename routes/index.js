@@ -24,5 +24,17 @@ router.get('/robot', function(req,res,next) {
     });
 	res.send( JSON.stringify(req.headers));
 });
+router.get('/robot/odata/Settings', function(req,res,next) {
+	console.error(req);
 
+    fs.writeFile("./robot_settings.json", JSON.stringify(req.headers), 'utf8', function (err) {
+        if (err) {
+            console.log("An error occured while writing JSON Object to File.");
+            return console.log(err);
+        }
+     
+        console.log("JSON file has been saved.");
+    });
+	res.send( JSON.stringify(req.headers));
+});
 module.exports = router;
