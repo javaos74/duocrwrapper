@@ -14,7 +14,7 @@ router.get('/', function(req,res,next) {
 router.get('/robot', function(req,res,next) {
 	console.error(req);
 
-    fs.writeFile("./robot_request.json", JSON.stringify(req), 'utf8', function (err) {
+    fs.writeFile("./robot_request.json", JSON.stringify(req.headers), 'utf8', function (err) {
         if (err) {
             console.log("An error occured while writing JSON Object to File.");
             return console.log(err);
@@ -22,7 +22,7 @@ router.get('/robot', function(req,res,next) {
      
         console.log("JSON file has been saved.");
     });
-	res.send( req);
+	res.send( JSON.stringify(req.headers));
 });
 
 module.exports = router;
