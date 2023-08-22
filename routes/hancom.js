@@ -84,7 +84,7 @@ router.post('/', function(req, res, next) {
     request.post( options, function(err, resp) {
         if( err) {
             console.log(err);
-            return res.status(500).send("Unknow errors");
+            return res.status(500).send("Unknown error");
         }
         hancom = JSON.parse(resp.body);
         if( resp.statusCode == 422)

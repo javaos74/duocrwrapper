@@ -95,7 +95,7 @@ router.post('/', function(req, res, next) {
         */
         if( err) {
             console.log(err);
-            return res.status(500).send("Unknow errors");
+            return res.status(500).send("Unknown error");
         }
         synap = JSON.parse(resp.body);
         if( resp.statusCode == 401 || resp.statusCode == 402) 
