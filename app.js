@@ -9,6 +9,7 @@ var synapRouter = require('./routes/synap.js');
 var clovaRouter = require('./routes/clova.js');
 var qandaRouter = require('./routes/qanda.js');
 var hancomRouter = require('./routes/hancom.js');
+var upstageRouter = require('./routes/upstage.js');
 var indexRouter = require('./routes/index.js');
 var app = express();
 
@@ -28,6 +29,7 @@ app.use('/synap', synapRouter);
 app.use('/clova', clovaRouter);
 app.use('/qanda', qandaRouter);
 app.use('/hancom', hancomRouter);
+app.use('/upstage', upstageRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

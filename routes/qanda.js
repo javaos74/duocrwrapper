@@ -68,11 +68,11 @@ router.post('/', function(req, res, next) {
     res.writeContinue();
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
     let buff = Buffer.from( req.body.requests[0].image.content, "base64");
-    var filename = uuid.v4();
-    fs.writeFileSync( __dirname + '/' + filename + '.img', buff);
+    //var filename = uuid.v4();
+    //fs.writeFileSync( __dirname + '/' + filename + '.img', buff);
     //multipart/form-data
     var formdata = {
-        image: fs.createReadStream( __dirname + '/' + filename + '.img')
+        image: buff //fs.createReadStream( __dirname + '/' + filename + '.img')
     }
     if( hints.hints && hints.hints.length > 0)
     {
@@ -94,10 +94,6 @@ router.post('/', function(req, res, next) {
     //console.log( req.body.requests[0].features); [ { type: 'TextDetection' } ]
     //console.log( formdata.context, formdata.hints)
     request.post( options, function(err, resp) {
-        fs.unlink( __dirname + '/' + filename + '.img', (err) => {
-            if( err)
-                console.error('error on file deletion ');
-        });
         if( err) {
             console.log(err);
             return res.status(500).send("Unknow errors");
@@ -157,8 +153,6 @@ router.post('/', function(req, res, next) {
         //du_resp.responses[0].description = qanda.text;
         //평균 score 값을 계산 
         du_resp.responses[0].score = score_sum / du_resp.responses[0].textAnnotations.length;
-        //console.log( JSON.stringify(du_resp));
-        //fs.writeFileSync(__dirname + '/' + filename+".json", JSON.stringify(du_resp));
         res.send( du_resp);
 
     });

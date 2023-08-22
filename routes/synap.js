@@ -66,14 +66,14 @@ router.post('/', function(req, res, next) {
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
     //let buff = new Buffer( req.body.requests[0].image.content, "base64");
     let buff = Buffer.from( req.body.requests[0].image.content, "base64");
-    var filename = uuid.v4();
-    fs.writeFileSync( __dirname + "/" + filename+".jpg", buff);
+    //var filename = uuid.v4();
+    //fs.writeFileSync( __dirname + "/" + filename+".jpg", buff);
 
     const formdata = {
         api_key: req.headers['x-uipath-license'],
         type: 'upload',
         boxes_type: synap_boxes_type,
-        image: fs.createReadStream( __dirname + '/'+ filename+'.jpg'),
+        image: buff, //fs.createReadStream( __dirname + '/'+ filename+'.jpg'),
         coord: 'origin',
         skew: 'image',
         langs: 'all',
@@ -87,10 +87,12 @@ router.post('/', function(req, res, next) {
 
 
     request.post( options, function(err, resp) {
-        fs.unlink( __dirname + '/' + filename + '.jpg', (err) => {
-            if( err)
+        /*
+        fs.unlink( __dirname + '/' + filename + '.jpg', (err2) => {
+            if( err2)
                 console.error('error on file deletion ');
         });
+        */
         if( err) {
             console.log(err);
             return res.status(500).send("Unknow errors");

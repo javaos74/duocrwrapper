@@ -13,5 +13,8 @@
     },
     "hancom": {
         "endpoint" : "http://ocr-server.apps.orca.cloud.hancom.com/argoocr"
+    },
+    "upstage": {
+        "endpoint" : "https://ap-northeast-2.apistage.ai/v1/document-ai/ocr"
     }
 }
