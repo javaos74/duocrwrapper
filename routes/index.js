@@ -37,4 +37,10 @@ router.get('/robot/odata/Settings', function(req,res,next) {
     });
 	res.send( JSON.stringify(req.headers));
 });
+
+router.post('/ocr', function(req, res, next) {
+    console.log(req.headers);
+    res.send( "OK");
+});
+
 module.exports = router;

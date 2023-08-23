@@ -123,7 +123,7 @@ router.post('/', function(req, res, next) {
                 type: 'text',
                 boundingPoly: p.boundingBox //구성이 동일해서 그대로 사용 
             });
-            desc += p.text;
+            //desc += p.text;
 
             //min_score =  Math.min( min_score, p.confidence);
             if( rotation_check_count >= 0) {
@@ -152,11 +152,8 @@ router.post('/', function(req, res, next) {
                 max_idx = idx;
             }
         }
-        du_resp.responses[0].description = desc;
+        //du_resp.responses[0].description = desc;
         du_resp.responses[0].angle =  rot_val[max_idx];
-        //가장 낮은 score 값을 사용 
-        //du_resp.responses[0].score = min_score;
-        //console.log( JSON.stringify(du_resp));
         res.send( du_resp);
     });
 });
