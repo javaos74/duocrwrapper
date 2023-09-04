@@ -52,5 +52,5 @@ jobs:
         with:
           app-name: 'charlesocrwrapper'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_94860ECC15E043FF90A60FAE9BE181AC }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DBBC23793DB748259D6D6369E80CB7EE }}
           package: .
