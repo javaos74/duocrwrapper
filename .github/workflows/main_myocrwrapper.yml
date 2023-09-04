@@ -50,7 +50,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'myocrwrapper'
+          app-name: 'charlesocrwrapper'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_94860ECC15E043FF90A60FAE9BE181AC }}
           package: .
