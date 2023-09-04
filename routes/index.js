@@ -4,6 +4,8 @@ const fs = require('fs');
 
 
 router.get('/', function(req,res,next) {
+    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
+    console.log("client ip: " + ip);
     const info = {
             message: "choose one ocr engine: /clova for Naver Clova OCR Engine, /synap for Synapsoft OCR Engine",
             version: "1.0.0"
