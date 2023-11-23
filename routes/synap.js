@@ -147,19 +147,53 @@ router.post('/', function(req, res, next) {
         }
 
         boxes.forEach( p => {
-            du_resp.responses[0].textAnnotations.push ({
-                description: p[5],
-                score: p[4],
-                type: 'text',
-                boundingPoly: {
-                    vertices: [
-                        {x: p[0][0], y: p[0][1]},
-                        {x: p[1][0], y: p[1][1]},
-                        {x: p[2][0], y: p[2][1]},
-                        {x: p[3][0], y: p[3][1]}
-                    ]
-                }
-            });
+            //word 중에 : 에 있다면 
+            let idxcol = p[5].indexOf(":");
+            if( idxcol > 0 && p[5].length-3 > idxcol) {
+                let wlen = p[5].length;
+                // : 기준 left (:포함)
+                du_resp.responses[0].textAnnotations.push ({
+                    description: p[5].substring(0, idxcol+1),
+                    score: p[4],
+                    type: 'text',
+                    boundingPoly: {
+                        vertices: [
+                            {x: p[0][0], y: p[0][1]},
+                            {x: p[0][0] + ((idxcol+1) * Math.abs( p[0][0]-p[1][0]))/wlen, y: p[1][1]},
+                            {x: p[0][0] + ((idxcol+1) * Math.abs( p[3][0]-p[2][0]))/wlen, y: p[2][1]},
+                            {x: p[3][0], y: p[3][1]}
+                        ]
+                    }
+                });
+                // : 기준 right (:제외)
+                du_resp.responses[0].textAnnotations.push ({
+                    description: p[5].substring(idxcol+1),
+                    score: p[4],
+                    type: 'text',
+                    boundingPoly: {
+                        vertices: [
+                            {x: p[0][0] + ((wlen-idxcol-1) * Math.abs(p[1][0]-p[0][0]))/wlen, y: p[0][1]},
+                            {x: p[1][0], y: p[1][1]},
+                            {x: p[2][0], y: p[2][1]},
+                            {x: p[3][0] + ((wlen-idxcol-1) * Math.abs(p[2][0]-p[3][0]))/wlen, y: p[3][1]}
+                        ]
+                    }
+                }); 
+            } else {
+                du_resp.responses[0].textAnnotations.push ({
+                    description: p[5],
+                    score: p[4],
+                    type: 'text',
+                    boundingPoly: {
+                        vertices: [
+                            {x: p[0][0], y: p[0][1]},
+                            {x: p[1][0], y: p[1][1]},
+                            {x: p[2][0], y: p[2][1]},
+                            {x: p[3][0], y: p[3][1]}
+                        ]
+                    }
+                });
+             }
             min_score =  Math.min( min_score, p[4]);
         })
         //가장 낮은 score 값을 계산 
