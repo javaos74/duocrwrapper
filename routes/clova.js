@@ -26,18 +26,30 @@ router.get('/info/model', function(req,res,next) {
 router.get('/config', function(req,res,next) {
     const cfg = {
         clova : {
-            endpoint: nconf.get("clova:endpoint")
+            endpoint: nconf.get("clova:endpoint"),
+            lang: nconf.get('lang') || 'ko,ja'
         }
     }
     res.send( cfg);
 });
 
 router.put('/config', function(req,res,next) {
-    //console.log(req.body);
+    _changed = 0;
     if( req.body.clova && req.body.clova.endpoint )
     {
         nconf.set("clova:endpoint", req.body.clova.endpoint);
         nconf.save()
+        _changed = 1;
+        
+    }
+    if( req.body.clova && req.body.clova.lang )
+    {
+        nconf.set("clova:lang", req.body.clova.lang);
+        nconf.save()
+        _changed = 1;
+    }
+    if( _changed)
+    {
         res.sendStatus(200);
     }
     else 
@@ -52,11 +64,9 @@ router.post('/', function(req, res, next) {
     const clova_endpoint = process.env.CLOVA_ENDPOINT || nconf.get("clova:endpoint");
     res.writeContinue();
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
-    //let buff = new Buffer( req.body.requests[0].image.content, "base64");
-    //console.log( req.headers);
     let buff = Buffer.from( req.body.requests[0].image.content, "base64");
     var filename = uuid.v4();
-    //fs.writeFileSync( __dirname + '/' + filename+'.img', buff);
+    fs.writeFileSync( __dirname + '/' + filename+'.img', buff);
 
     const feature = imsize( buff); // __dirname + '/' + filename+'.img');
 
@@ -64,40 +74,41 @@ router.post('/', function(req, res, next) {
         version: 'V2',
         requestId : filename,
         timestamp : Date.now(),
-        lang: 'ko',
+        lang:  nconf.get("lang") || 'ko,ja',
         images : [{
             name: filename,
             format: 'jpeg'
+  //          ,data: req.body.requests[0].image.content // for application/json
         }]
     }
     //multipart/form-data
     const formdata = {
         message : JSON.stringify(req_msg),
-        file: buff //fs.createReadStream( __dirname + '/'+ filename+'.img')
+        file : fs.createReadStream( __dirname + '/'+ filename+'.img')
     }
 
     const options = {
         url: clova_endpoint,
         method: 'POST',
         formData: formdata,
+//        json: req_msg,
         headers: {
             'X-OCR-SECRET': req.headers['x-uipath-license'],
+//            'Content-Type': 'application/json'
             'Content-Type': 'multipart/form-data'
             }
     }
 
     request.post( options, function(err, resp) {
-        /*
-        fs.unlink( __dirname + '/' + filename+'.img', (err) => {
-            if( err)
+        fs.unlink( __dirname + '/' + filename + '.img', (err2) => {
+            if( err2)
                 console.error('error on file deletion ');
         });
-        */
         if( err) {
             console.log(err);
             return res.status(500).send("Unknown error");
-        }
-        //fs.writeFileSync( __dirname +'/'+filename+'.json', resp.body);
+        } 
+        
         clova = JSON.parse(resp.body);
         if( resp.statusCode == 401 || resp.statusCode == 402) 
         {
