@@ -54,7 +54,6 @@ router.post('/', function(req, res, next) {
     let buff = Buffer.from( req.body.requests[0].image.content, "base64");
     var filename = uuid.v4();
     fs.writeFileSync( __dirname + '/' + filename+'.png', buff);
-    //const feature = imsize( __dirname + '/' + filename+'.img');
     //multipart/form-data
     const formdata = {
         image: fs.createReadStream( __dirname + '/'+ filename+'.png')
@@ -78,16 +77,19 @@ router.post('/', function(req, res, next) {
             console.log(err);
             return res.status(500).send("Unknown error");
         }
-        //fs.writeFileSync( __dirname +'/'+filename+'.json', resp.body);
-        upstage = JSON.parse(resp.body);
         if( resp.statusCode == 401 || resp.statusCode == 402) 
         {
             return res.status(401).send("Unauthorized");
         }
-        if( resp.statusCode != 200) {
+        else if( resp.statusCode == 500 || resp.statusCode == 502 || resp.statusCode == 503)
+        {
+            return res.status(500).send("Internal Server Error");
+        }
+        else if( resp.statusCode != 200) {
             console.log( upstage);
             return res.status(415).send("Unsupported Media Type or Not Acceptable");
         }
+        upstage = JSON.parse(resp.body);
         var min_score = 1.0;
         var full_text = ''
         var du_resp = {
@@ -157,7 +159,5 @@ router.post('/', function(req, res, next) {
         res.send( du_resp);
     });
 });
-
-
 
 module.exports = router;

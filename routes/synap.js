@@ -101,11 +101,11 @@ router.post('/', function(req, res, next) {
         {
             return res.status(401).send("Unauthorized");
         }
-        if( resp.statusCode == 500 || resp.statusCode == 502 || resp.statusCode == 503)
+        else if( resp.statusCode == 500 || resp.statusCode == 502 || resp.statusCode == 503)
         {
             return res.status(500).send("Internal Server Error");
         }
-        if( resp.statusCode != 200) {
+        else if( resp.statusCode != 200) {
             console.log( resp.body);
             return res.status(415).send("Unsupported Media Type or Not Acceptable ");
         }
