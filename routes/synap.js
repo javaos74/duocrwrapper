@@ -66,14 +66,14 @@ router.post('/', function(req, res, next) {
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
     //let buff = new Buffer( req.body.requests[0].image.content, "base64");
     let buff = Buffer.from( req.body.requests[0].image.content, "base64");
-    //var filename = uuid.v4();
-    //fs.writeFileSync( __dirname + "/" + filename+".jpg", buff);
+    var filename = uuid.v4();
+    fs.writeFileSync( __dirname + "/" + filename+".jpg", buff);
 
     const formdata = {
         api_key: req.headers['x-uipath-license'],
         type: 'upload',
         boxes_type: synap_boxes_type,
-        image: buff, //fs.createReadStream( __dirname + '/'+ filename+'.jpg'),
+        image: fs.createReadStream( __dirname + '/'+ filename+'.jpg'),
         coord: 'origin',
         skew: 'image',
         langs: 'all',
@@ -87,25 +87,29 @@ router.post('/', function(req, res, next) {
 
 
     request.post( options, function(err, resp) {
-        /*
+        
         fs.unlink( __dirname + '/' + filename + '.jpg', (err2) => {
             if( err2)
                 console.error('error on file deletion ');
         });
-        */
+        
         if( err) {
             console.log(err);
             return res.status(500).send("Unknown error");
         }
-        synap = JSON.parse(resp.body);
         if( resp.statusCode == 401 || resp.statusCode == 402) 
         {
             return res.status(401).send("Unauthorized");
         }
+        if( resp.statusCode == 500 || resp.statusCode == 502 || resp.statusCode == 503)
+        {
+            return res.status(500).send("Internal Server Error");
+        }
         if( resp.statusCode != 200) {
-            console.log( synap);
+            console.log( resp.body);
             return res.status(415).send("Unsupported Media Type or Not Acceptable ");
         }
+        synap = JSON.parse(resp.body);
         var min_score = 1.0;
         var du_resp = {
             responses: [
