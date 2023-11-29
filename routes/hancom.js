@@ -62,9 +62,7 @@ router.post('/', function(req, res, next) {
     const hancom_endpoint = process.env.HANCOM_ENDPOINT || nconf.get("hancom:endpoint");
     res.writeContinue();
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
-    //let buff = Buffer.from( req.body.requests[0].image.content, "base64");
     var filename = uuid.v4();
-    //fs.writeFileSync( __dirname + "/" + filename+".jpg", buff);
 
     const formdata = {
         key: req.headers['x-uipath-license'],
@@ -80,22 +78,24 @@ router.post('/', function(req, res, next) {
         formData: formdata,
     }
 
-
     request.post( options, function(err, resp) {
         if( err) {
             console.log(err);
             return res.status(500).send("Unknown error");
         }
-        hancom = JSON.parse(resp.body);
         if( resp.statusCode == 422)
         {
-            return res.status(422).send("Validation Error");
+            return res.status(401).send("Unauthorized");
         }
-        if( resp.statusCode != 200) {
+        else if( resp.statusCode == 500 || resp.statusCode == 502 || resp.statusCode == 503)
+        {
+            return res.status(500).send("Internal Server Error");
+        }
+        else if( resp.statusCode != 200) {
             console.log( hancom);
             return res.status(415).send( hancom.msg);
         }
-        //console.log(hancom);
+        hancom = JSON.parse(resp.body);
         var min_score = 1.0;
         var du_resp = {
             responses: [
@@ -137,9 +137,8 @@ router.post('/', function(req, res, next) {
             });
             min_score = Math.min( min_score, parseFloat(p.score));
         })
-        //평균 score 값을 계산 
+        //최소 score 값을 계산 
         du_resp.responses[0].score = min_score;
-        //console.log(du_resp);
         res.send( du_resp);
 
     });
