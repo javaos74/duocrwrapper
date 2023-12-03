@@ -64,7 +64,6 @@ router.post('/', function(req, res, next) {
     const synap_boxes_type = process.env.SYNAP_BOXES_TYPE || "block";
     res.writeContinue();
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
-    //let buff = new Buffer( req.body.requests[0].image.content, "base64");
     let buff = Buffer.from( req.body.requests[0].image.content, "base64");
     var filename = uuid.v4();
     fs.writeFileSync( __dirname + "/" + filename+".jpg", buff);
@@ -153,8 +152,11 @@ router.post('/', function(req, res, next) {
         boxes.forEach( p => {
             //word 중에 : 에 있다면 
             let idxcol = p[5].indexOf(":");
-            if( idxcol > 0 && p[5].length-3 > idxcol) {
+            if( idxcol  > 0 && p[5].length-1 > idxcol) {
                 let wlen = p[5].length;
+                let llen = ((idxcol+1) * Math.abs( p[0][0]-p[1][0]))/wlen; 
+                //console.log(`org: ${p[5]} >>>  ${p[5].substring(0, idxcol+1)}  <->  ${p[5].substring(idxcol+1)}`);
+                //console.log(`left len: ${llen} ,right len:  ${Math.abs(p[1][0]-p[0][0])-llen}`);
                 // : 기준 left (:포함)
                 du_resp.responses[0].textAnnotations.push ({
                     description: p[5].substring(0, idxcol+1),
@@ -163,8 +165,8 @@ router.post('/', function(req, res, next) {
                     boundingPoly: {
                         vertices: [
                             {x: p[0][0], y: p[0][1]},
-                            {x: p[0][0] + ((idxcol+1) * Math.abs( p[0][0]-p[1][0]))/wlen, y: p[1][1]},
-                            {x: p[0][0] + ((idxcol+1) * Math.abs( p[3][0]-p[2][0]))/wlen, y: p[2][1]},
+                            {x: p[0][0] + llen-2, y: p[1][1]},
+                            {x: p[0][0] + llen-2, y: p[2][1]},
                             {x: p[3][0], y: p[3][1]}
                         ]
                     }
@@ -176,10 +178,10 @@ router.post('/', function(req, res, next) {
                     type: 'text',
                     boundingPoly: {
                         vertices: [
-                            {x: p[0][0] + ((wlen-idxcol-1) * Math.abs(p[1][0]-p[0][0]))/wlen, y: p[0][1]},
+                            {x: p[0][0] + llen + 2, y: p[0][1]},
                             {x: p[1][0], y: p[1][1]},
                             {x: p[2][0], y: p[2][1]},
-                            {x: p[3][0] + ((wlen-idxcol-1) * Math.abs(p[2][0]-p[3][0]))/wlen, y: p[3][1]}
+                            {x: p[3][0] + llen + 2, y: p[3][1]}
                         ]
                     }
                 }); 
