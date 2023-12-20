@@ -153,8 +153,15 @@ router.post('/', function(req, res, next) {
             //word 중에 : 에 있다면 
             let idxcol = p[5].indexOf(":");
             if( idxcol  > 0 && p[5].length-1 > idxcol) {
-                let wlen = p[5].length;
-                let llen = ((idxcol+1) * Math.abs( p[0][0]-p[1][0]))/wlen; 
+                //let wlen = p[5].length;
+                let twordarr = [...p[5]];
+                //console.log(twordarr);
+                let wlen = twordarr.reduce( (acc,cur) => acc + (cur.codePointAt(0) > 255 ? 2:1), 0);
+                //console.log(`multibyte word length : ${wlen}`)
+                let multibytepos = [...p[5].substring(0,idxcol)].reduce( (acc, cur) => acc + (cur.codePointAt(0)> 255 ? 2:1), 0);
+                //console.log(`multibyte left length : ${multibytepos}`)
+                //let llen = ((idxcol+1) * Math.abs( p[0][0]-p[1][0]))/wlen; 
+                let llen = ((multibytepos+1) * Math.abs( p[0][0]-p[1][0]))/wlen; 
                 //console.log(`org: ${p[5]} >>>  ${p[5].substring(0, idxcol+1)}  <->  ${p[5].substring(idxcol+1)}`);
                 //console.log(`left len: ${llen} ,right len:  ${Math.abs(p[1][0]-p[0][0])-llen}`);
                 // : 기준 left (:포함)
