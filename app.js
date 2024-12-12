@@ -10,6 +10,7 @@ var clovaRouter = require('./routes/clova.js');
 var qandaRouter = require('./routes/qanda.js');
 var hancomRouter = require('./routes/hancom.js');
 var upstageRouter = require('./routes/upstage.js');
+var dpRouter= require('./routes/upstage-dp.js');
 var readRouter = require('./routes/read.js');
 
 var indexRouter = require('./routes/index.js');
@@ -20,7 +21,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
-app.use(express.json({limit: '10mb'}));
+app.use(express.json({limit: '20mb'}));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -32,6 +33,7 @@ app.use('/clova', clovaRouter);
 app.use('/qanda', qandaRouter);
 app.use('/hancom', hancomRouter);
 app.use('/upstage', upstageRouter);
+app.use('/upstage-dp', dpRouter);
 app.use('/read', readRouter);
 
 // catch 404 and forward to error handler
