@@ -97,6 +97,7 @@ router.post('/', function(req, res, next) {
         }
         upstage = JSON.parse(resp.body);
         var min_score = 1.0;
+        var full_text;
         var du_resp = {
             responses: [
                 {
@@ -124,8 +125,9 @@ router.post('/', function(req, res, next) {
         var skew = [0,0,0,0];// { 0, 90, 180, 270 } 회전됨 문서
         var rotation_check_count = 20;
         upstage.elements.forEach( p => {
+            full_text = full_text + "\n" + p.category == 'table' ? p.content['markdown'] : p.content[out_f];
             du_resp.responses[0].textAnnotations.push ({
-                description: p.content[out_f],
+                description: p.category == 'table' ? p.content['markdown'] : p.content[out_f],
                 score: 0.0,
                 type: 'text',
                 boundingPoly: {
@@ -158,6 +160,7 @@ router.post('/', function(req, res, next) {
                 max_idx = idx;
             }
         }
+        du_resp.responses[0].description = full_text;
         du_resp.responses[0].angle =  rot_val[max_idx];
         res.send( du_resp);
     });
