@@ -22,5 +22,8 @@
     },
     "upstage-dp": {
         "endpoint": "https://api.upstage.ai/v1/document-ai/document-parse"
+    },
+    "textin": {
+        "endpoint": "https://api.textin.com/ai/service/v2/recognize/multipage"
     }
 }
