@@ -92,7 +92,6 @@ router.post('/', function(req, res, next) {
         }
         var min_score = 1.0;
         textin = JSON.parse(resp.body);
-        console.log(resp.body);
         var du_resp = {
             responses: [
                 {
