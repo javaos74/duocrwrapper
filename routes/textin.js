@@ -92,10 +92,11 @@ router.post('/', function(req, res, next) {
         }
         var min_score = 1.0;
         textin = JSON.parse(resp.body);
+        console.log(resp.body);
         var du_resp = {
             responses: [
                 {
-                    angle: textin.pages[0].angle, // 나중에 skew값을 계산해서 업데이트 함 
+                    angle: textin.result.pages[0].angle, // 나중에 skew값을 계산해서 업데이트 함 
                     textAnnotations: [
                         {
                             description : "",//textin.pages[0].text,
@@ -105,9 +106,9 @@ router.post('/', function(req, res, next) {
                             boundingPoly : { // 응답값이 해당 내용이 없어 이미지의 크기정보를 이용해서 구성 
                                 vertices: [
                                     {x: 0, y: 0},
-                                    {x: textin.pages[0].width, y: 0},
-                                    {x: textin.pages[0].width, y: textin.pages[0].height},
-                                    {x: 0, y: textin.pages[0].height}
+                                    {x: textin.result.pages[0].width, y: 0},
+                                    {x: textin.result.pages[0].width, y: textin.result.pages[0].height},
+                                    {x: 0, y: textin.result.pages[0].height}
                                 ]
                             }
                         }
@@ -116,7 +117,7 @@ router.post('/', function(req, res, next) {
             ]
         }
         var desc;
-        textin.pages[0].lines.forEach( p => {
+        textin.result.pages[0].lines.forEach( p => {
             du_resp.responses[0].textAnnotations.push ({
                 description: p.text,
                 score: p.score,
