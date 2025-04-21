@@ -25,5 +25,8 @@
     },
     "textin": {
         "endpoint": "https://api.textin.com/ai/service/v2/recognize/multipage?lang_opt=tha"
+    },
+    "lit": {
+        "endpoint": " http://3.16.117.194:9998/litocr-general"
     }
 }

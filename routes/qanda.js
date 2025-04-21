@@ -34,9 +34,9 @@ router.get('/config', function(req,res,next) {
 
 router.put('/config', function(req,res,next) {
     //console.log(req.body);
-    if( req.body.clova && req.body.clova.endpoint )
+    if( req.body.qanda && req.body.qanda.endpoint )
     {
-        nconf.set("qanda:endpoint", req.body.clova.endpoint);
+        nconf.set("qanda:endpoint", req.body.qanda.endpoint);
         nconf.save()
         res.sendStatus(200);
     }
