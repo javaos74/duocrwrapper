@@ -60,15 +60,14 @@ router.put('/config', function(req,res,next) {
 
 /* POST body listing. */
 router.post('/', function(req, res, next) {
-    //const clova_endpoint = process.env.CLOVA_ENDPOINT || "https://412baztid8.apigw.ntruss.com/custom/v1/83/962db625f801e2f12fd4eb7ce08994255f56d8a27639ea5c30e23cac89b10a86/general";
     const clova_endpoint = process.env.CLOVA_ENDPOINT || nconf.get("clova:endpoint");
     res.writeContinue();
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
     let buff = Buffer.from( req.body.requests[0].image.content, "base64");
     var filename = uuid.v4();
-    fs.writeFileSync( __dirname + '/' + filename+'.img', buff);
 
     const feature = imsize( buff); // __dirname + '/' + filename+'.img');
+    fs.writeFileSync( __dirname + '/' + filename + '.' + feature.type, buff);
 
     const req_msg = {
         version: 'V2',
@@ -77,30 +76,28 @@ router.post('/', function(req, res, next) {
         lang:  nconf.get("lang") || 'ko,ja',
         images : [{
             name: filename,
-            format: 'jpeg'
+            format: feature.type,
   //          ,data: req.body.requests[0].image.content // for application/json
         }]
     }
     //multipart/form-data
     const formdata = {
         message : JSON.stringify(req_msg),
-        file : fs.createReadStream( __dirname + '/'+ filename+'.img')
+        file : fs.createReadStream( __dirname + '/'+ filename + '.' + feature.type)
     }
 
     const options = {
         url: clova_endpoint,
         method: 'POST',
         formData: formdata,
-//        json: req_msg,
         headers: {
             'X-OCR-SECRET': req.headers['x-uipath-license'],
-//            'Content-Type': 'application/json'
             'Content-Type': 'multipart/form-data'
-            }
+        }
     }
 
     request.post( options, function(err, resp) {
-        fs.unlink( __dirname + '/' + filename + '.img', (err2) => {
+        fs.unlink( __dirname + '/' + filename + '.' + feature.type, (err2) => {
             if( err2)
                 console.error('error on file deletion ');
         });

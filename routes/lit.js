@@ -53,19 +53,16 @@ router.put('/config', function(req,res,next) {
 
 /* POST body listing. */
 router.post('/', function(req, res, next) {
-    //const lit_endpoint = process.env.lit_ENDPOINT || "https://412baztid8.apigw.ntruss.com/custom/v1/83/962db625f801e2f12fd4eb7ce08994255f56d8a27639ea5c30e23cac89b10a86/general";
     const lit_endpoint = process.env.LIT_ENDPOINT || nconf.get("lit:endpoint");
     res.writeContinue();
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
     let buff = Buffer.from( req.body.requests[0].image.content, "base64");
     var filename = uuid.v4();
-    fs.writeFileSync( __dirname + '/' + filename+'.img', buff);
-
-    const feature = imsize( buff); // __dirname + '/' + filename+'.img');
-
+    const feature = imsize( buff); 
+    fs.writeFileSync( __dirname + '/' + filename + '.' + feature.type, buff);
     //multipart/form-data
     const formdata = {
-        file : fs.createReadStream( __dirname + '/'+ filename+'.img')
+        file : fs.createReadStream( __dirname + '/'+ filename + '.' + feature.type)
     }
 
     const options = {
@@ -73,14 +70,13 @@ router.post('/', function(req, res, next) {
         method: 'POST',
         formData: formdata,
         headers: {
-//            'X-OCR-SECRET': req.headers['x-uipath-license'],
-            'Content-Type': 'application/json',
+            'Accept': 'application/json',
             'Content-Type': 'multipart/form-data'
-            }
+        }
     }
 
     request.post( options, function(err, resp) {
-        fs.unlink( __dirname + '/' + filename + '.img', (err2) => {
+        fs.unlink( __dirname + '/' + filename + '.' + feature.type, (err2) => {
             if( err2)
                 console.error('error on file deletion ');
         });
@@ -136,6 +132,7 @@ router.post('/', function(req, res, next) {
             desc += p.description;
 
             min_score =  Math.min( min_score, p.confidence);
+        
             if( rotation_check_count >= 0) {
                 if( p.boundingPoly.vertices[0].x == p.boundingPoly.vertices[1].x &&
                     p.boundingPoly.vertices[1].y == p.boundingPoly.vertices[2].y && 
@@ -166,7 +163,6 @@ router.post('/', function(req, res, next) {
         du_resp.responses[0].angle =  rot_val[max_idx];
         //가장 낮은 score 값을 사용 
         du_resp.responses[0].score = min_score;
-        //console.log( JSON.stringify(du_resp));
         res.send( du_resp);
     });
 });
