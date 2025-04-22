@@ -25,5 +25,8 @@
     },
     "textin": {
         "endpoint": "https://api.textin.com/ai/service/v2/recognize/multipage?lang_opt=tha"
+    },
+    "lit": {
+        "endpoint": "http://{ocr-endpoint}:{ocr-service-port}/litocr-general"
     }
 }

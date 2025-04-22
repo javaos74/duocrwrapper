@@ -13,6 +13,7 @@ var upstageRouter = require('./routes/upstage.js');
 var dpRouter= require('./routes/upstage-dp.js');
 var readRouter = require('./routes/read.js');
 var textinRouter = require('./routes/textin.js');
+var litRouter = require('./routes/lit.js');
 
 var indexRouter = require('./routes/index.js');
 var app = express();
@@ -37,6 +38,7 @@ app.use('/upstage', upstageRouter);
 app.use('/upstage-dp', dpRouter);
 app.use('/read', readRouter);
 app.use('/textin', textinRouter);
+app.use('/lit', litRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -25,9 +25,8 @@ router.get('/info/model', function(req,res,next) {
 
 router.get('/config', function(req,res,next) {
     const cfg = {
-        clova : {
-            endpoint: nconf.get("clova:endpoint"),
-            lang: nconf.get('lang') || 'ko,ja'
+        lit : {
+            endpoint: nconf.get("lit:endpoint")
         }
     }
     res.send( cfg);
@@ -35,18 +34,12 @@ router.get('/config', function(req,res,next) {
 
 router.put('/config', function(req,res,next) {
     _changed = 0;
-    if( req.body.clova && req.body.clova.endpoint )
+    if( req.body.lit && req.body.lit.endpoint )
     {
-        nconf.set("clova:endpoint", req.body.clova.endpoint);
+        nconf.set("lit:endpoint", req.body.lit.endpoint);
         nconf.save()
         _changed = 1;
         
-    }
-    if( req.body.clova && req.body.clova.lang )
-    {
-        nconf.set("clova:lang", req.body.clova.lang);
-        nconf.save()
-        _changed = 1;
     }
     if( _changed)
     {
@@ -54,44 +47,30 @@ router.put('/config', function(req,res,next) {
     }
     else 
     {
-        res.status(404).send("no clova.endpoint ");
+        res.status(404).send("no lit.endpoint ");
     }
 });
 
 /* POST body listing. */
 router.post('/', function(req, res, next) {
-    const clova_endpoint = process.env.CLOVA_ENDPOINT || nconf.get("clova:endpoint");
+    const lit_endpoint = process.env.LIT_ENDPOINT || nconf.get("lit:endpoint");
     res.writeContinue();
     var hash = crypto.createHash('md5').update( req.body.requests[0].image.content).digest('hex');  
     let buff = Buffer.from( req.body.requests[0].image.content, "base64");
     var filename = uuid.v4();
-
-    const feature = imsize( buff); // __dirname + '/' + filename+'.img');
+    const feature = imsize( buff); 
     fs.writeFileSync( __dirname + '/' + filename + '.' + feature.type, buff);
-
-    const req_msg = {
-        version: 'V2',
-        requestId : filename,
-        timestamp : Date.now(),
-        lang:  nconf.get("lang") || 'ko,ja',
-        images : [{
-            name: filename,
-            format: feature.type,
-  //          ,data: req.body.requests[0].image.content // for application/json
-        }]
-    }
     //multipart/form-data
     const formdata = {
-        message : JSON.stringify(req_msg),
         file : fs.createReadStream( __dirname + '/'+ filename + '.' + feature.type)
     }
 
     const options = {
-        url: clova_endpoint,
+        url: lit_endpoint,
         method: 'POST',
         formData: formdata,
         headers: {
-            'X-OCR-SECRET': req.headers['x-uipath-license'],
+            'Accept': 'application/json',
             'Content-Type': 'multipart/form-data'
         }
     }
@@ -106,13 +85,13 @@ router.post('/', function(req, res, next) {
             return res.status(500).send("Unknown error");
         } 
         
-        clova = JSON.parse(resp.body);
+        lit = JSON.parse(resp.body);
         if( resp.statusCode == 401 || resp.statusCode == 402) 
         {
             return res.status(401).send("Unauthorized");
         }
         if( resp.statusCode != 200) {
-            console.log( clova);
+            console.log( lit);
             return res.status(415).send("Unsupported Media Type or Not Acceptable ");
         }
         var min_score = 1.0;
@@ -143,17 +122,17 @@ router.post('/', function(req, res, next) {
         var desc;
         var skew = [0,0,0,0];// { 0, 90, 180, 270 } 회전됨 문서
         var rotation_check_count = 20;
-        clova.images[0].fields.forEach( p => {
+        lit.textAnnotations.forEach( p => {
             du_resp.responses[0].textAnnotations.push ({
-                description: p.inferText,
-                score: p.inferConfidence,
+                description: p.description,
+                score: p.confidence,
                 type: 'text',
                 boundingPoly: p.boundingPoly //구성이 동일해서 그대로 사용 
             });
-            desc += p.inferText;
-            if( p.lineBreak)
-                desc += "\n";
-            min_score =  Math.min( min_score, p.inferConfidence);
+            desc += p.description;
+
+            min_score =  Math.min( min_score, p.confidence);
+        
             if( rotation_check_count >= 0) {
                 if( p.boundingPoly.vertices[0].x == p.boundingPoly.vertices[1].x &&
                     p.boundingPoly.vertices[1].y == p.boundingPoly.vertices[2].y && 
@@ -184,7 +163,6 @@ router.post('/', function(req, res, next) {
         du_resp.responses[0].angle =  rot_val[max_idx];
         //가장 낮은 score 값을 사용 
         du_resp.responses[0].score = min_score;
-        //console.log( JSON.stringify(du_resp));
         res.send( du_resp);
     });
 });
