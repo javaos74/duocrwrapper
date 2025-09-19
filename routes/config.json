@@ -1,6 +1,6 @@
 {
     "synap": {
-        "endpoint": "https://ailab.synap.co.kr/sdk/ocr"
+        "endpoint": "http://synap.myrobots.co.kr/sdk/ocr"
     },
     "msread": {
         "endpoint": "http://msread.koreacentral.cloudapp.azure.com:5000"
@@ -16,6 +16,9 @@
     },
     "hancom": {
         "endpoint" : "http://ocr-server.apps.orca.cloud.hancom.com/argoocr"
+    },
+    "hancom2": {
+        "endpoint" : "http://ocr-server.apps.orca.cloud.hancom.com/api/v1/hocr/sdk"
     },
     "upstage": {
         "endpoint" : "https://api.upstage.ai/v1/document-ai/ocr"
